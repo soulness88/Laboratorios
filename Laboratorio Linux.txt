@@ -1,0 +1,4 @@
+Dado el txt de datos:
+Agrupar los siguientes datos:
+ -Hacer un fichero por genero musical que agrupe las canciones pertenecientes a ese mismo genero
+ -El separador de los objetos debe cambiar de , a |
