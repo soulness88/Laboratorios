@@ -1,0 +1,50 @@
+Laboratorio GitHub Actions
+*Todos los apartados se pueden realizar desde la consola de github, visual studio integrado con git
+ o consola bash. Se recomienda utilizar esta ultima para ganar soltura con los comandos git
+
+1-Crear un nuevo repositorio Git
+
+2-Subir el siguiente fichero proporcionado
+main.go
+
+3-Generar un GitHub Actions de prueba para ver en que consiste y ejecutar
+*Ejercicio de comprension:
+github-actions-demo.yml 
+
+4-Editar el fichero de actions para compilar go (se puede renombrar el fichero), comprobar y 
+conseguir que funcione el job:
+*Ejercicio de trabajo con informacion limitada. Se puede usar internet o chatgpt como apoyo. Entender
+por que hacemos lo que hacemos. Se aporta el codigo necesario para compilar go con github actions:
+name: Go
+on:
+  push:
+    branches: [ "main" ]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Check out repository code
+      uses: actions/checkout@v3
+    - run: echo "💡 The ${{ github.repository }} repository has been cloned to the runner."
+    - name: List files in the repository
+      run: |
+          ls ${{ github.workspace }}
+    - name: Set up Go
+      uses: actions/setup-go@v4
+      with:
+        go-version: '1.21.5'
+    - name: Build
+      run: go build -v ./...
+    - run: echo "🍏 This job's status is ${{ job.status }}."
+
+5-Añadir a git el fichero proporcionado
+main_test.go
+
+6- Ver que el actions triggerea y termina ok
+
+7- Añadir el testeo de codigo en la parte del actions para que pase un test de calidad al codigo y ver que
+termina bien
+    - name: Test
+      run: go test -v ./...
+
+*BonusTrack provocar que el testeo de un error y provoque el error del job para ver que funciona bien
