@@ -1,0 +1,113 @@
+Laboratorio Docker1:
+
+1- Tenemos que instalar Docker para el ejercicio
+sudo apt-get update
+sudo apt-get install apt-transport-https ca-certificates curl software-properties-common
+curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
+sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu focal stable"
+
+sudo apt-get update
+sudo apt-get install docker
+
+Comprobamos que esta arrancado:
+sudo systemctl status docker
+
+Y metemos nuestro usuario local como sudoer para docker para ejecutar sin necesidad de sudo:
+sudo usermod -aG docker ${USER}
+
+Actualizamos permisos de nuestro usuario
+su - ${USER}
+
+Si hacemos un id veremos que nuestro usuario esta incluido en el grupo de docker
+
+*si estas usando root....eres libre, pero tambien hay que aprender a escalar permisos y
+meter capas de selinux para trabajar con esto, pronto entenderas por que
+
+*Docker: Es el paquete que nos va a dejar operar con la tecnologia Docker
+
+
+2- Prueba de concepto con imagenes
+
+docker pull hello-world:latest
+Entender esta sentencia
+
+docker images
+Entender esta sentencia
+
+docker run redhat/ubi8 echo 'Hello world!'
+Entender que hace esta sentencia viendo su ejecucion.
+
+docker ps -a
+*-a es para que nos muestre todos los procesos pertenecientes al ecosistema de docker
+
+
+Explicacion a lo anterior
+-> Si no tenemos la imagen en nuestro repositorio local, nos descargara la imagen desde el repositorio
+oficial de docker
+-> Levantara un proceso con el contenedor indicado que nos devolvera lo solicitado
+-> Como el proceso no es necesario mas, lo parara para evitar consumos innecesarios
+
+docker images
+-> Vemos que aqui ya tenemos descargada la imagen en nuestro repositorio, si volvemos a realizar un run
+no volvera a descargarla
+
+
+3- Prueba de concepto, acciones concretas con imagenes.
+Ejecutar un ubi de redhat para navegar por el interior de nuestro contenedor activo. Parar el contenedor una vez terminado
+
+• ubi es el acronimo de: Universal Base Image. Son contenedores base gratuitos que podemos customizar despues
+• -t es equivalente a --tty, lo que significa que se debe asignar pseudo-tty
+(pseudoterminal) para el contenedor.
+• -i es lo mismo que --interactive. Cuando se usa, la entrada estándar se
+mantiene abierta en el contenedor.
+• -d, o su forma larga --detach, significa que el contenedor se ejecuta en
+segundo plano (independiente). A continuación, Podman imprime el identificador
+del contenedor.
+
+docker run -d redhat/ubi8 /bin/bash
+docker ps
+-> Esto nos devolvera los contenedores ACTIVOS de docker, lo podemos usar para saber las etiquetas o los ids asociados
+docker exec -it <<id contenedor|tag>> /bin/bash
+
+>Explorar y entender que estamos dentro de la "maquina virtual" de ubuntu. Entender las implicaciones
+que puede tener disponer de una maquina con el usuario que tenemos
+
+#whoami
+#id
+
+docker --help *Buscad como parar el contenedor
+
+
+4- Prueba de concepto, ciertos contenedores necesitan inicializar ciertas variables para funcionar:
+docker run --name mysql-custom -e MYSQL_USER=user -e MYSQL_PASSWORD=pringao -e MYSQL_ROOT_PASSWORD=r00tP4ss MYSQL_DATABASE=prueba -d mysql:latest
+
+* --name: El tag que se le dara a la imagen dentro del orquestador de podman, si no se usa el propio
+orquestador le generara una tag aleatoria. Las etiquetas dentro del mundo cloud/docker/kubernetes/etc
+son SUPER IMPORTANTES asi que quedaros con esto. Un ejemplo de tag generada automaticamente:
+CONTAINER ID  IMAGE                           COMMAND               CREATED       STATUS           NAMES
+d70821e216e0  docker.io/library/nginx:latest  nginx -g daemon o...  22 hours ago  Up 22 hours ago  exciting_antonelli
+
+5- Ejercicio amable: Entrad en el contenedor de mysql y conectaros a la bbdd de mysql con las credenciales que le asigneis para comprobar
+que la bbdd que habeis indicado existe
+
+6- Prueba de concepto y resolucion de problemas. Conseguir que la imagen funcione: status: up
+(En esta sentencia y que sin que sirva de precedente, esta todo mal. La idea es que busqueis una
+alternativa viable y GRATUITA. La imagen que levanteis no tiene por que ser una de httpd)
+docker run -d -p 8080 registry.redhat.io/rhel8/httpd-24
+*El -d le va a indicar a docker que se tiene que ejecutar en segundo plano, asi que aunque termine su
+cometido va a seguir ejecutandose
+*El -p indica el puerto de la maquina remota que estamos vinculando. El puerto del contenedor se vinculara a un puerto de nuestra maquina local
+podman port -l
+
+
+
+6- Comprobar que el puerto esta enlazado correctamente
+Para comprobar que funciona: curl http://0.0.0.0:<puerto local>
+ ->Bien: 
+<!DOCTYPE html>
+<html>
+<head>
+<title>Welcome to nginx!</title>
+
+ ->Mal:
+curl: (56) Recv failure: Connection reset by peer
